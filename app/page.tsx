@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [searchWeb, setSearchWeb] = useState(true);
   const [asking, setAsking] = useState(false);
   useEffect(() => {
-    const load = () => fetch("/api/market").then(r => r.json()).then(setMarket).catch(() => undefined);
+    const load = () => fetch(`/api/market?t=${Date.now()}`, { cache: "no-store" }).then(r => r.json()).then(setMarket).catch(() => undefined);
     load(); const id = setInterval(load, 15000); const clock = setInterval(() => setNow(new Date()), 1000);
     return () => { clearInterval(id); clearInterval(clock); };
   }, []);
