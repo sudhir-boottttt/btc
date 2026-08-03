@@ -10,11 +10,11 @@ async function binance(): Promise<Quote> {
   return { price: +d.lastPrice, change: +d.priceChangePercent, high: +d.highPrice, low: +d.lowPrice, volume: +d.quoteVolume, source: "Binance BTC/USDT" };
 }
 async function coingecko(): Promise<Quote> {
-  const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_24hr_high=true&include_24hr_low=true", { headers: { accept: "application/json" }, next: { revalidate: 30 } });
+  const r = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&price_change_percentage=24h", { headers: { accept: "application/json" }, next: { revalidate: 30 } });
   if (!r.ok) throw new Error("CoinGecko unavailable");
-  const d = (await r.json()).bitcoin;
-  if (!d?.usd) throw new Error("CoinGecko returned no BTC price");
-  return { price: +d.usd, change: +d.usd_24h_change || 0, high: +d.usd_24h_high || 0, low: +d.usd_24h_low || 0, volume: +d.usd_24h_vol || 0, source: "CoinGecko BTC/USD fallback" };
+  const d = (await r.json())[0];
+  if (!d?.current_price) throw new Error("CoinGecko returned no BTC price");
+  return { price: +d.current_price, change: +d.price_change_percentage_24h || 0, high: +d.high_24h || 0, low: +d.low_24h || 0, volume: +d.total_volume || 0, source: "CoinGecko BTC/USD fallback" };
 }
 async function coinbase(): Promise<Quote> {
   const [tickerResponse, statsResponse] = await Promise.all([fetch("https://api.exchange.coinbase.com/products/BTC-USD/ticker", { next: { revalidate: 15 } }), fetch("https://api.exchange.coinbase.com/products/BTC-USD/stats", { next: { revalidate: 15 } })]);
